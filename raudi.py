@@ -26,8 +26,7 @@ def sexy_intro():
 
 def build(tool_name, config, push_image, remote_src, tests):
     dirname = DEFAULT_TOOL_DIR + tool_name
-    image_exists = check_if_docker_image_exists("{name}:{tag}".format(name=config['name'], tag=config['version']), remote_src)
-    if image_exists == False:
+    if (image_exists := check_if_docker_image_exists("{name}:{tag}".format(name=config['name'], tag=config['version']), remote_src)) == False:
         log("Building {docker_image}...".format(docker_image="{name}:{tag}".format(name=config['name'], tag=config['version'])))
         client = docker.from_env()
         client.images.build(buildargs=config['buildargs'], path=dirname, tag="{name}:{tag}".format(name=config['name'], tag=config['version']), rm=True)
