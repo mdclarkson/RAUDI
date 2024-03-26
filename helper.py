@@ -1,8 +1,8 @@
-import requests
 import re
 import docker
 from os import listdir
 from os.path import isfile, join
+from security import safe_requests
 
 # Global vars
 DOCKER_API = {
@@ -34,7 +34,7 @@ def get_highest_version_number(version_numbers):
     return version_numbers[-1]
 
 def get_latest_docker_hub_version(docker_image, org="library/"):
-    r = requests.get(DOCKER_API['base']+org+docker_image+DOCKER_API['tags'])
+    r = safe_requests.get(DOCKER_API['base']+org+docker_image+DOCKER_API['tags'])
     results = r.json()['results']
     regex = '^\d{1,4}(\.\d+)*$' # Only digits and dots (avoid Date-based tags)
     tags_with_version_number = [result["name"] for result in results if re.match(regex, result["name"])]
@@ -44,17 +44,17 @@ def get_latest_docker_hub_version(docker_image, org="library/"):
         return 'latest'
 
 def get_latest_pip_version(package):
-    r = requests.get(PYPI_API['base']+package+PYPI_API['json'])
+    r = safe_requests.get(PYPI_API['base']+package+PYPI_API['json'])
     version = r.json()['info']['version']
     return version
 
 def get_latest_npm_registry_version(package):
-    r = requests.get(NPM_REGISTRY_API['base']+package+NPM_REGISTRY_API['latest_release'])
+    r = safe_requests.get(NPM_REGISTRY_API['base']+package+NPM_REGISTRY_API['latest_release'])
     version = r.json()['version']
     return version
 
 def get_latest_github_release(repo, target_string):
-    r = requests.get(GITHUB_API['base']+repo+GITHUB_API['latest_release'])
+    r = safe_requests.get(GITHUB_API['base']+repo+GITHUB_API['latest_release'])
     try:
         assets = r.json()['assets']
         for asset in assets:
@@ -67,7 +67,7 @@ def get_latest_github_release(repo, target_string):
         logErr('Error while retriving info from GitHub. Maybe Rate Limiting took place...')
 
 def get_latest_github_release_no_browser_download(repo):
-    r = requests.get(GITHUB_API['base']+repo+GITHUB_API['latest_release'])
+    r = safe_requests.get(GITHUB_API['base']+repo+GITHUB_API['latest_release'])
 
     data = r.json()
     if r.status_code != 200:
@@ -79,7 +79,7 @@ def get_latest_github_release_no_browser_download(repo):
     }
 
 def get_latest_github_tag_no_browser_download(repo):
-    r = requests.get(GITHUB_API['base']+repo+GITHUB_API['tags'])
+    r = safe_requests.get(GITHUB_API['base']+repo+GITHUB_API['tags'])
     regex = '^[v]?\d{1,4}(\.\d+)*$' # Only digits and dots (avoid Date-based tags)
     results = r.json()
 
